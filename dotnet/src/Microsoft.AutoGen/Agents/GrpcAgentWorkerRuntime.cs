@@ -239,7 +239,14 @@ public sealed class GrpcAgentWorkerRuntime : IHostedService, IDisposable, IAgent
 
     private async Task WriteChannelAsync(Message message)
     {
-        await _outboundMessagesChannel.Writer.WriteAsync(message).ConfigureAwait(false);
+        try
+        {
+            await _outboundMessagesChannel.Writer.WriteAsync(message).ConfigureAwait(false);
+        }
+        catch (ChannelClosedException)
+        {
+            // Ignore.
+        }
     }
 
     private AsyncDuplexStreamingCall<Message, Message> GetChannel()
